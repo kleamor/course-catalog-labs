@@ -25,9 +25,25 @@ Open `http://127.0.0.1:8000/docs` to use Swagger UI.
 Useful commands:
 
 ```powershell
+# Create a migration after changing a SQLAlchemy model
+.\.venv\Scripts\alembic.exe revision --autogenerate -m "describe change"
+
+# Inspect migration history and the active database revision
 .\.venv\Scripts\alembic.exe current
 .\.venv\Scripts\alembic.exe history
+
+# Check model changes and apply migrations
 .\.venv\Scripts\alembic.exe check
+.\.venv\Scripts\alembic.exe upgrade head
+.\.venv\Scripts\alembic.exe upgrade +1
+
+# Undo the last migration if necessary
+.\.venv\Scripts\alembic.exe downgrade -1
+
+# Mark an existing database as a version without running that migration again
+.\.venv\Scripts\alembic.exe stamp 0001
+
+# Verify the project database and models
 .\.venv\Scripts\python.exe check_db.py
 .\.venv\Scripts\python.exe check_models.py
 ```
