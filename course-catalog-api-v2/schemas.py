@@ -1,30 +1,49 @@
-from pydantic import BaseModel, ConfigDict, Field
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from pydantic.alias_generators import to_camel
 
 
 class CamelModel(BaseModel):
-    """Use camelCase at the JSON boundary while keeping Python snake_case."""
+    """Use camelCase in JSON and snake_case inside Python."""
 
-    model_config = ConfigDict(
-        alias_generator=to_camel,
-        validate_by_name=True,
-        validate_by_alias=True,
-    )
+    model_config = ConfigDict(alias_generator=to_camel, validate_by_name=True, validate_by_alias=True, from_attributes=True)
 
 
-class Course(CamelModel):
+class CourseOut(CamelModel):
     id: str
     title: str
     description: str
     credits: int
-    is_elective: bool = False
-    likes: int = 0
+    is_elective: bool
+    likes: int
+    level: str
+
+
+class StudentIn(CamelModel):
+    name: str = Field(min_length=2)
+    email: EmailStr
+
+
+class StudentOut(StudentIn):
+    id: int
 
 
 class EnrollmentIn(CamelModel):
     course_id: str
-    student_name: str = Field(min_length=2)
+    student_id: int
 
 
-class Enrollment(EnrollmentIn):
+class EnrollmentOut(EnrollmentIn):
     id: int
+    enrolled_at: datetime
+
+
+class EnrollmentDetail(EnrollmentOut):
+    course_title: str
+    student_name: str
+
+
+class CourseStats(CamelModel):
+    course_id: str
+    enrolled: int
