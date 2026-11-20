@@ -59,6 +59,35 @@ Useful commands:
 
 The API keeps camelCase JSON (`courseId`, `studentId`) at the browser boundary, but Python and database code use snake_case.
 
+## Example: create a new migration
+
+This is a learning example only. The current Lab 7 schema does not include `duration_hours`.
+
+1. Add a nullable field to the `Course` model in `models.py`:
+
+```python
+duration_hours: Mapped[int] = mapped_column(nullable=True)
+```
+
+2. Generate a migration from the changed model:
+
+```powershell
+.\.venv\Scripts\alembic.exe revision --autogenerate -m "add course duration"
+```
+
+3. Review the new file in `alembic/versions/`. It should add the `duration_hours`
+column to `courses`.
+
+4. Apply it and verify the result:
+
+```powershell
+.\.venv\Scripts\alembic.exe upgrade head
+.\.venv\Scripts\alembic.exe current
+```
+
+The expected current version after this example would be `0003 (head)`. To return
+to the previous version, run `alembic downgrade -1` before removing the model field.
+
 ## Structure
 
 - `config.py` reads the ignored `.env` settings.
