@@ -1,88 +1,53 @@
-# Course Catalog API — Local Alternative
+# Course Catalog API Lab 7
 
-This is a distinct local implementation of Labs 4–5. It preserves the Lab 4
-course queries while adding the Lab 5 browser integration contract: CORS for
-the Next.js frontend, camelCase JSON, likes, and course enrollments.
+The backend now stores the course catalog in PostgreSQL. SQLAlchemy models describe the tables in Python, while Alembic keeps the database schema versioned.
 
-## Run locally
+## Start locally
 
-Python 3.10 or newer is required.
+1. Create a database and role as in Lab 6, then copy `.env.example` to `.env`.
+2. Put your own local PostgreSQL password into `DATABASE_URL` in `.env`. Never commit this file.
+3. Install and start the API:
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-fastapi dev main.py
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\alembic.exe upgrade head
+.\.venv\Scripts\python.exe -m uvicorn main:app --reload
 ```
 
-The API is available at <http://127.0.0.1:8000>. Interactive documentation is available at <http://127.0.0.1:8000/docs>.
+Open `http://127.0.0.1:8000/docs` to use Swagger UI.
 
-## Lab 5 changes
+## Database migration workflow
 
-- CORS permits only the frontend origin `http://localhost:3000`. All methods
-  and request headers are allowed so the browser can send the JSON enrollment
-  request and its preflight succeeds.
-- Python code keeps snake_case names, while JSON uses camelCase. For example,
-  a course has `isElective`, and an enrollment body uses `courseId` and
-  `studentName`. Query parameters remain snake_case, so use
-  `is_elective=true`.
-- `POST /courses/{course_id}/like` increments an in-memory counter and returns
-  the updated course. Unknown IDs return `404`.
-- `POST /enrollments` accepts an enrollment body and returns `201 Created` with
-  an ID. Student names need at least two characters; unknown course IDs return
-  `404`. `GET /enrollments` returns the in-memory enrollment list.
+- `0001_create_catalog_tables` creates `courses`, `students`, and `enrollments`.
+- `0002_add_course_level` adds a required `courses.level` column safely: it adds it nullable, fills existing rows with `beginner`, then makes it required.
+- The existing Lab 6 database was marked at revision `0001` with `alembic stamp 0001`, then upgraded to `0002`. This avoids recreating or deleting existing data.
 
-Likes and enrollments reset whenever `fastapi dev` restarts. They are stored
-in memory for this laboratory, not in a database.
+Useful commands:
 
-Useful Lab 5 checks after starting the server:
-
-```bash
-curl -i -H "Origin: http://localhost:3000" http://127.0.0.1:8000/courses
-curl -i -X OPTIONS http://127.0.0.1:8000/enrollments \
-  -H "Origin: http://localhost:3000" \
-  -H "Access-Control-Request-Method: POST" \
-  -H "Access-Control-Request-Headers: content-type"
-curl -s -X POST http://127.0.0.1:8000/courses/web-security/like
-curl -i -X POST http://127.0.0.1:8000/enrollments \
-  -H "Content-Type: application/json" \
-  -d '{"courseId":"web-security","studentName":"Aigerim"}'
+```powershell
+.\.venv\Scripts\alembic.exe current
+.\.venv\Scripts\alembic.exe history
+.\.venv\Scripts\alembic.exe check
+.\.venv\Scripts\python.exe check_db.py
+.\.venv\Scripts\python.exe check_models.py
 ```
 
-Run the automated checks with:
+## Main API routes
 
-```bash
-python -m unittest discover -s tests -v
-```
+- `GET /courses` filters, sorts, and paginates courses from PostgreSQL.
+- `GET /courses/{course_id}` and `POST /courses/{course_id}/like` read and update a course.
+- `POST /students` creates a student; duplicate email returns `409`.
+- `POST /enrollments` links an existing student and course; foreign-key and duplicate errors become clear HTTP responses.
+- `GET /enrollments` joins enrollment, course, and student data.
+- `GET /stats/courses` uses `LEFT OUTER JOIN` and `COUNT` so courses without enrollments are included.
 
-## What was verified
-
-- `GET /` returns `{"message": "Course Catalog API is running"}`.
-- `GET /courses` returns all six courses ordered by popularity, starting with `ai-integration`.
-- `GET /courses?is_elective=true` returns `ai-integration` and `api-design`.
-- `GET /courses?is_elective=false` returns the four required courses.
-- `GET /courses?sort=title` returns all six courses in alphabetical title order.
-- `GET /courses?page=1&page_size=2` returns `ai-integration` and `modern-frontend`.
-- `GET /courses?page=2&page_size=2` returns `web-security` and `backend-fastapi`.
-- `GET /courses?page=3&page_size=2` returns `databases-postgresql` and `api-design`.
-- `GET /courses?page=4&page_size=2` returns an empty list.
-- `GET /courses/web-security` returns the matching course.
-- `GET /courses/nope` returns HTTP 404 with `{"detail": "Course not found"}`.
-- Invalid `sort`, `page`, and `page_size` values return HTTP 422.
-- CORS permits `http://localhost:3000`, rejects foreign origins, and accepts
-  the `POST /enrollments` preflight request.
-- JSON response fields use camelCase while existing query parameters remain
-  snake_case.
-- `POST /courses/{course_id}/like` increments a course or returns 404.
-- `POST /enrollments` returns 201 for valid camelCase JSON, 422 for an invalid
-  name, and 404 for an unknown course; `GET /enrollments` returns saved records.
-- `/docs`, `/redoc`, and `/openapi.json` are generated by FastAPI; the OpenAPI
-  document contains the six Lab 5 API operations.
+The API keeps camelCase JSON (`courseId`, `studentId`) at the browser boundary, but Python and database code use snake_case.
 
 ## Structure
 
-- `models.py` defines the camelCase API models and validation constraints.
-- `data.py` contains the six required in-memory courses.
-- `catalog.py` provides read-only catalog access.
-- `course_queries.py` owns validated pagination and the filter → sort → paginate pipeline.
-- `main.py` configures CORS and declares the six Lab 5 API routes.
+- `config.py` reads the ignored `.env` settings.
+- `db.py` owns the engine, sessions, metadata naming convention, and `get_db` dependency.
+- `models.py` contains SQLAlchemy tables and relationships.
+- `schemas.py` contains Pydantic validation and API response schemas.
+- `alembic/versions/` contains reproducible schema migrations.
+- `seed.sql`, `check_db.py`, `check_models.py`, and `try_errors.py` support setup and verification.
