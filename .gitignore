@@ -12,6 +12,7 @@ course-catalog-api-v2/*.log
 
 # Local configuration and temporary review output
 **/.env.local
+**/.env
 .docx-review/
 
 # Editor and operating-system files
