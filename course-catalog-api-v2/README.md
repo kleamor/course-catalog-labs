@@ -88,6 +88,36 @@ column to `courses`.
 The expected current version after this example would be `0003 (head)`. To return
 to the previous version, run `alembic downgrade -1` before removing the model field.
 
+## Verification checklist for the defense
+
+Start the API first, then run these commands from the `course-catalog-api-v2`
+folder. They demonstrate more than eight independent checks.
+
+```powershell
+# 1. PostgreSQL connection, current database, and row counts
+.\.venv\Scripts\python.exe check_db.py
+
+# 2. ORM model columns, constraints, and indexes
+.\.venv\Scripts\python.exe check_models.py
+
+# 3. The migration revision applied to PostgreSQL
+.\.venv\Scripts\alembic.exe current
+
+# 4. SQLAlchemy models and Alembic migrations have no pending differences
+.\.venv\Scripts\alembic.exe check
+
+# 5-9. Invalid student (422), missing course (404), missing student (404),
+# duplicate enrollment (409), and invalid pagination (422)
+.\.venv\Scripts\python.exe try_errors.py
+
+# 10. Automated API tests
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+The expected Alembic version is `0002 (head)`. The final automated test result
+should be `OK`. The `try_errors.py` script requires the API at
+`http://127.0.0.1:8000` to be running.
+
 ## Structure
 
 - `config.py` reads the ignored `.env` settings.
