@@ -1,0 +1,19 @@
+# Frontend dependencies and build output
+course-catalog-v2/node_modules/
+course-catalog-v2/.next/
+course-catalog-v2/out/
+course-catalog-v2/*.log
+
+# Python environments, caches, and server output
+course-catalog-api-v2/.venv/
+course-catalog-api-v2/__pycache__/
+course-catalog-api-v2/**/*.py[cod]
+course-catalog-api-v2/*.log
+
+# Local configuration and temporary review output
+**/.env.local
+.docx-review/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
