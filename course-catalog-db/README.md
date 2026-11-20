@@ -7,7 +7,7 @@ PostgreSQL schema, initial data, and SQL queries for the Course Catalog labs.
 PostgreSQL 16 or newer is required. As a PostgreSQL superuser, create the application role and the three databases once:
 
 ```sql
-CREATE ROLE catalog_app LOGIN PASSWORD 'change-me';
+CREATE ROLE catalog_app LOGIN PASSWORD '<choose-a-local-password>';
 CREATE DATABASE course_catalog OWNER catalog_app;
 CREATE DATABASE idx_demo OWNER catalog_app;
 CREATE DATABASE norm_demo OWNER catalog_app;
@@ -21,7 +21,7 @@ psql -h localhost -U catalog_app -d course_catalog -v ON_ERROR_STOP=1 -f seed.sq
 psql -h localhost -U catalog_app -d course_catalog -v ON_ERROR_STOP=1 -f queries.sql
 ```
 
-After loading the seed data, the database contains six courses, three students, and six enrollments.
+After loading the seed data, the database contains six courses, three students, and six enrollments. Keep the actual local password out of Git and use environment variables or a secret manager when an application connects to PostgreSQL.
 
 ## Schema
 
