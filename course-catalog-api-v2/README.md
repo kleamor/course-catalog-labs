@@ -31,6 +31,16 @@ For the defense, run `python try_graphql.py`, `python try_n_plus_1.py`, and
 `python measure.py` with the API server running. The frontend pages
 `/my-courses` and `/my-courses-rest` show the same data via the two APIs.
 
+From PowerShell in this backend folder, run the eight GraphQL self-checks:
+
+```powershell
+.\.venv\Scripts\python.exe try_graphql.py
+```
+
+Expected final line on the starting course data: `8 of 8 as expected`. The
+checks cover a course list, one course, a missing course, a student's nested
+courses, three expected enrollment errors, and a misspelled GraphQL field.
+
 | Client view | HTTP requests | Typical SQL queries | Response size |
 | --- | ---: | ---: | --- |
 | REST My courses | 5 | 5 | Run `measure.py` for your current bytes |
