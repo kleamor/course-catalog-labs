@@ -2,6 +2,8 @@
 
 This repository contains the complete Course Catalog coursework.
 
+Lab 8 adds GraphQL alongside REST and two My courses pages for comparison.
+
 - `course-catalog-v2` - Next.js frontend from Lab 5.
 - `course-catalog-api-v2` - FastAPI backend from Labs 5 and 7, now using PostgreSQL, SQLAlchemy, and Alembic.
 - `course-catalog-db` - PostgreSQL schema, seed data, SQL queries, and database experiments from Lab 6.

@@ -1,5 +1,46 @@
 # Course Catalog API Lab 7
 
+## Lab 8: GraphQL alongside REST
+
+Install the updated requirements, then start the backend. The same PostgreSQL
+database is available through REST at `/docs` and GraphQL at `/graphql`.
+Opening `/graphql` in a browser shows GraphiQL. Example query:
+
+```graphql
+query MyCourses($id: ID!) {
+  student(id: $id) {
+    name
+    enrollments { id course { title credits level } }
+  }
+}
+```
+
+Variables: `{ "id": "2" }`. The `enroll` and `likeCourse` mutations return
+`userErrors` for expected application errors. REST uses Problem Details with
+`application/problem+json` for the same errors. Both use the rules in
+`services.py`.
+
+DataLoaders batch nested student, course, and enrollment lookups. The
+`X-SQL-Queries` response header shows the number of SQL statements; the
+nested student query and the all-students query each make 3 SQL requests.
+Depth and alias limits, bounded list arguments, error masking, and configurable
+introspection protect the GraphQL endpoint. Set `GRAPHQL_INTROSPECTION=false`
+in the local `.env` to disable schema discovery.
+
+For the defense, run `python try_graphql.py`, `python try_n_plus_1.py`, and
+`python measure.py` with the API server running. The frontend pages
+`/my-courses` and `/my-courses-rest` show the same data via the two APIs.
+
+| Client view | HTTP requests | Typical SQL queries | Response size |
+| --- | ---: | ---: | --- |
+| REST My courses | 5 | 5 | Run `measure.py` for your current bytes |
+| GraphQL My courses | 1 | 3 | Run `measure.py` for your current bytes |
+
+The timings and bytes depend on the machine and current data. The GraphQL
+query includes only the fields requested by the page. A bad GraphQL field
+returns an `errors` array, often with HTTP 200; clients must inspect it.
+Expected rule errors are instead in the mutation's `userErrors`.
+
 The backend now stores the course catalog in PostgreSQL. SQLAlchemy models describe the tables in Python, while Alembic keeps the database schema versioned.
 
 ## Start locally
