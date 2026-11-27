@@ -179,7 +179,7 @@ class Mutation:
             return LikePayload(user_errors=as_user_errors(error))
 
 
-extensions = [QueryDepthLimiter(max_depth=5), MaxAliasesLimiter(max_alias_count=10), MaskErrors()]
+extensions = [QueryDepthLimiter(max_depth=5), MaxAliasesLimiter(max_alias_count=10), MaskErrors(should_mask_error=lambda error: error.original_error is not None)]
 if not settings.graphql_introspection:
     extensions.append(DisableIntrospection())
 schema = strawberry.Schema(query=Query, mutation=Mutation, extensions=extensions)
