@@ -50,6 +50,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               >
                 Filter
               </Link>
+              <Link href="/my-courses" className="rounded-full px-3 py-2 text-sm font-semibold text-emerald-950 transition-colors hover:bg-sky-100">My courses</Link>
               <Link
                 href="/about"
                 className="rounded-full px-3 py-2 text-sm font-semibold text-emerald-950 transition-colors hover:bg-sky-100"
