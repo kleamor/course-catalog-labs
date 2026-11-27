@@ -35,3 +35,6 @@ class GraphQLTests(unittest.TestCase):
         self.assertIn("errors", response.json())
         response = self.client.get("/graphql", params={"query": 'mutation { likeCourse(id: "api-design") { course { likes } } }'}, headers={"Accept": "application/json"})
         self.assertEqual(response.status_code, 400)
+        aliases = "{ " + " ".join(f'a{i}: course(id: "api-design") {{ id }}' for i in range(11)) + " }"
+        response = self.client.post("/graphql", json={"query": aliases})
+        self.assertIn("errors", response.json())
