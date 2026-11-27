@@ -36,6 +36,18 @@ For the defense, run `python try_graphql.py`, `python try_n_plus_1.py`, and
 | REST My courses | 5 | 5 | Run `measure.py` for your current bytes |
 | GraphQL My courses | 1 | 3 | Run `measure.py` for your current bytes |
 
+On the local sample data, `measure.py` reported 1,956 response bytes and 226.9 ms
+for REST versus 331 bytes and 11.2 ms for GraphQL. These are one-run measurements,
+not a benchmark; repeat them on the defense machine.
+
+Experiment observations: a misspelled GraphQL field produced `errors` with HTTP
+200, while a missing REST course produced Problem Details with HTTP 404. A
+student's three courses and all students' courses each took three SQL queries
+with DataLoaders. A query deeper than five levels was rejected by the depth
+limiter. A GET mutation was rejected with HTTP 400. Use `try_protection.py` for
+more probes. `flood_likes.py` deliberately changes the database, so run it only
+when you intend to demonstrate that behavior.
+
 The timings and bytes depend on the machine and current data. The GraphQL
 query includes only the fields requested by the page. A bad GraphQL field
 returns an `errors` array, often with HTTP 200; clients must inspect it.
