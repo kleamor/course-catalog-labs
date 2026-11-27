@@ -4,3 +4,4 @@ psycopg[binary]
 alembic
 pydantic-settings
 email-validator
+strawberry-graphql[fastapi]
